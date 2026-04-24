@@ -4,78 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FULL MARK | PRO</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1e293b; --accent: #2563eb; --bg: #f1f5f9; }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; }
+        :root { --primary: #0088cc; --accent: #2563eb; --bg: #f8fafc; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
         
-        .header { text-align: center; padding: 30px; color: var(--primary); }
-        .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; max-width: 1100px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        
-        .btn-view { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        /* صفحة الدخول */
+        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: white; text-align: center; padding: 20px; }
+        .login-box { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 320px; }
+        input { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #eee; border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box; }
+        .btn-login { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
 
-        /* نافذة العرض (Viewer) */
-        #video-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;
-        }
-        .viewer-box {
-            background: white; width: 90%; max-width: 900px; height: 80vh; border-radius: 20px;
-            position: relative; overflow: hidden; display: flex; flex-direction: column;
-        }
-        .close-btn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: black; z-index: 1001; }
-        iframe { width: 100%; flex-grow: 1; border: none; }
-        .viewer-footer { padding: 10px; text-align: center; background: #eee; }
+        /* المنصة */
+        #main-content { display: none; padding: 15px; }
+        .header { text-align: center; padding: 20px; background: var(--primary); color: white; border-radius: 0 0 20px 20px; margin-bottom: 20px; }
+        .subject-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .subject-title { color: var(--primary); font-weight: 700; font-size: 1.2rem; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; padding-bottom: 5px; }
+        .teacher-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #fafafa; }
+        .teacher-row:last-child { border: none; }
+        .btn-open { background: #e1f0fa; color: var(--primary); text-decoration: none; padding: 6px 15px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>FULL MARK | Platform</h1>
-        <p>اضغط على المدرس للمعاينة داخل المنصة</p>
-    </div>
-
-    <div class="subject-grid">
-        <div class="card">
-            <h3>اللغة العربية</h3>
-            <p>رضا الفاروق</p>
-            <button class="btn-view" onclick="openViewer('https://t.me/s/EL_Farouk_Official')">معاينة المحاضرات</button>
-        </div>
-
-        <div class="card">
-            <h3>الكيمياء</h3>
-            <p>محمد عبد الجواد</p>
-            <button class="btn-view" onclick="openViewer('https://t.me/s/m_abdelgawad')">معاينة المحاضرات</button>
-        </div>
-
-        <div class="card">
-            <h3>الفيزياء</h3>
-            <p>محمد عبد المعبود</p>
-            <button class="btn-view" onclick="openViewer('https://t.me/s/Physics_Abdelmaboud')">معاينة المحاضرات</button>
+    <div id="login-screen">
+        <div class="login-box">
+            <h1 style="color: var(--primary); margin:0;">FULL MARK</h1>
+            <p>ادخل كود الوصول</p>
+            <input type="password" id="access-code" placeholder="Code...">
+            <button class="btn-login" onclick="checkAuth()">دخول المنصة</button>
+            <p id="err" style="color:red; display:none; font-size: 0.8rem; margin-top: 10px;">الكود غلط يا بطل!</p>
         </div>
     </div>
 
-    <div id="video-overlay">
-        <div class="viewer-box">
-            <span class="close-btn" onclick="closeViewer()">&times;</span>
-            <iframe id="content-frame" src=""></iframe>
-            <div class="viewer-footer">
-                <p>إذا لم يظهر المحتوى، يمكنك <a id="direct-link" href="#" target="_blank" style="color: blue;">فتحه مباشرة في تليجرام</a></p>
-            </div>
+    <div id="main-content">
+        <div class="header">
+            <h2 id="welcome-msg">FULL MARK | Alternative</h2>
+            <p>كل المدرسين في جيبك</p>
+        </div>
+
+        <div class="subject-card">
+            <div class="subject-title">📚 اللغة العربية</div>
+            <div class="teacher-row"><span>رضا الفاروق</span><a href="https://t.me/+HEw-RmGIHm5lNmM0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>محمد صلاح</span><a href="https://t.me/+EEW-TCiIRLw3MDg8" class="btn-open">دخول</a></div>
+        </div>
+
+        <div class="subject-card">
+            <div class="subject-title">⚡ الفيزياء</div>
+            <div class="teacher-row"><span>محمد عبد المعبود</span><a href="https://t.me/+4LnGU3IsX_U2MTE0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>د. كيرلس</span><a href="https://t.me/+CXri0nffu1Q3MDA0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>محمود مجدي</span><a href="https://t.me/+pH5ZV-XHyHU2Yzg0" class="btn-open">دخول</a></div>
+        </div>
+
+        <div class="subject-card">
+            <div class="subject-title">🧪 الكيمياء</div>
+            <div class="teacher-row"><span>محمد عبد الجواد</span><a href="https://t.me/+u0EQ2rkZvYJkOWI0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>خالد صقر</span><a href="https://t.me/+PJuw7vinr0tmOWNk" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>جون جهبذ</span><a href="https://t.me/+FLSMYhUWNvs0ODdk" class="btn-open">دخول</a></div>
+        </div>
+
+        <div class="subject-card">
+            <div class="subject-title">🧬 الأحياء والجيولوجيا</div>
+            <div class="teacher-row"><span>جيو ماجد</span><a href="https://t.me/+p789CzNA-Yo3YjM0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>أحمد رضوان</span><a href="https://t.me/+DW-VMrnjB8VkOTI0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>محمد أيمن</span><a href="https://t.me/+cJ7-ZzlLxoRhZmI0" class="btn-open">دخول</a></div>
+        </div>
+
+        <div class="subject-card">
+            <div class="subject-title">🇬🇧 الإنجليزية</div>
+            <div class="teacher-row"><span>مي مجدي</span><a href="https://t.me/+xhZsZARfnIg4ODg0" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>شريف المصري</span><a href="https://t.me/+DOaIcPoYn29jYjhk" class="btn-open">دخول</a></div>
+            <div class="teacher-row"><span>عبد الحميد حامد</span><a href="https://t.me/+inb7_Vjg6fFjNDVk" class="btn-open">دخول</a></div>
         </div>
     </div>
 
     <script>
-        function openViewer(url) {
-            document.getElementById('content-frame').src = url;
-            document.getElementById('direct-link').href = url.replace('/s/', '/'); // تحويل لرابط تليجرام العادي
-            document.getElementById('video-overlay').style.display = 'flex';
-        }
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        function closeViewer() {
-            document.getElementById('video-overlay').style.display = 'none';
-            document.getElementById('content-frame').src = "";
+        function checkAuth() {
+            const code = document.getElementById('access-code').value;
+            if(code === "FM2024") { // الكود بتاعك
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                if(tg.initDataUnsafe.user) {
+                    document.getElementById('welcome-msg').innerText = "أهلاً يا " + tg.initDataUnsafe.user.first_name;
+                }
+            } else {
+                document.getElementById('err').style.display = 'block';
+            }
         }
     </script>
 </body>
